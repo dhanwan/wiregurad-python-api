@@ -2,7 +2,7 @@
 source_file="/etc/wireguard/wg0.conf"
 
 # Replace '/path/to/backup/directory' with the actual path to your backup directory
-backup_dir="/mnt/wg_backup/"
+backup_dir="/mnt/wg_backup"
 
 # Create a backup filename with the current date and time
 backup_filename="wg0_$(date +'%Y-%m-%d_%H-%M-%S').conf"
