@@ -20,14 +20,6 @@ def execute_backup_script():
     except FileNotFoundError:
         print("Backup script not found. Make sure the path is correct.")
 
-def append_key_to_file(file_path, content):
-    try:
-        with open(file_path, "a") as file:
-            file.write(content)
-        print(f"Content appended to {file_path}")
-    except Exception as e:
-        print(f"Error appending content to {file_path}: {str(e)}")
-
 def check_string_in_file(file_path, target_string):
     try:
         with open(file_path, 'r') as file:
@@ -58,9 +50,17 @@ def AddUser():
             execute_backup_script()
 
             print("add key and ips to wg0.conf file")
-            content = f"\n[Peer]\nPublicKey = {public_key}\nAllowedIPs = {allowed_ips}"
-            append_key_to_file(wgconf, content)
+            command = f"/usr/bin/wg set wg0 peer {public_key} allowed-ips {allowed_ips}"
+
+            try:
+                subprocess.run(command, shell=True, check=True)
+                print(f"Successfully added allowed IP {allowed_ips} for peer {public_key}")
+            except subprocess.CalledProcessError as e:
+                print(f"Error: {e}")
+                
+            # append_key_to_file(wgconf, content)
             command = ["/usr/bin/systemctl", "restart ","wg-quick@wg0.service"]
+
             subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             response_message = "Public key added successfully."
