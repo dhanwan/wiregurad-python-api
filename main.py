@@ -59,9 +59,9 @@ def AddUser():
                 print(f"Error: {e}")
                 
             # append_key_to_file(wgconf, content)
-            command = ["/usr/bin/systemctl", "restart ","wg-quick@wg0.service"]
+            command = "/usr/bin/systemctl restart wg-quick@wg0.service"
 
-            subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            subprocess.run(command, shell=True, check=True)
 
             response_message = "Public key added successfully."
             return Response(response_message)
