@@ -1,5 +1,5 @@
 # Replace '/path/to/source/file' with the actual path to your source file
-source_file="wg0.conf"
+source_file="/etc/wireguard/wg0.conf"
 
 # Replace '/path/to/backup/directory' with the actual path to your backup directory
 backup_dir="."

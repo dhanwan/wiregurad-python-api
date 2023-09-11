@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 # Taking backup of existing file
 
-wgconf = "wg0.conf"
+wgconf = "/etc/wireguard/wg0.conf"
 
 def execute_backup_script():
     try:
