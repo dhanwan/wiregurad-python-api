@@ -60,6 +60,9 @@ def AddUser():
             print("add key and ips to wg0.conf file")
             content = f"\n[Peer]\nPublicKey = {public_key}\nAllowedIPs = {allowed_ips}"
             append_key_to_file(wgconf, content)
+            command = ["systemctl", "restart ","wg-quick@wg0.service"]
+            subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
             response_message = "Public key added successfully."
             return Response(response_message)
         else:
