@@ -12,7 +12,7 @@ def execute_backup_script():
         script_path = 'script/backup.sh'
         
         # Execute the Bash script
-        subprocess.run(['bash', script_path], check=True)
+        subprocess.run(['/bin/bash', script_path], check=True)
 
         print("Backup completed successfully.")
     except subprocess.CalledProcessError as e:
