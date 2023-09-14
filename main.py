@@ -44,27 +44,32 @@ def AddUser():
         allowed_ips = data["ipv4"]
 
         checks = check_string_in_file(wgconf, public_key)
-        print(checks)
+        ipcks = check_string_in_file(wgconf, allowed_ips)
         if checks == "false" :
-            print("Taking backup of existing wg0.conf file")
-            execute_backup_script()
+            if ipcks == "false":
 
-            print("add key and ips to wg0.conf file")
-            command = f"/usr/bin/wg set wg0 peer {public_key} allowed-ips {allowed_ips}"
+                print("Taking backup of existing wg0.conf file")
+                execute_backup_script()
 
-            try:
+                print("add key and ips to wg0.conf file")
+                command = f"/usr/bin/wg set wg0 peer {public_key} allowed-ips {allowed_ips}"
+
+                try:
+                    subprocess.run(command, shell=True, check=True)
+                    print(f"Successfully added allowed IP {allowed_ips} for peer {public_key}")
+                except subprocess.CalledProcessError as e:
+                    print(f"Error: {e}")
+                    
+                # append_key_to_file(wgconf, content)
+                command = "/usr/bin/systemctl restart wg-quick@wg0.service"
+
                 subprocess.run(command, shell=True, check=True)
-                print(f"Successfully added allowed IP {allowed_ips} for peer {public_key}")
-            except subprocess.CalledProcessError as e:
-                print(f"Error: {e}")
+
+                response_message = "Public key added successfully."
+                return Response(response_message)
+            else:
+                return Response("Ip already exists Pls use different ip")
                 
-            # append_key_to_file(wgconf, content)
-            command = "/usr/bin/systemctl restart wg-quick@wg0.service"
-
-            subprocess.run(command, shell=True, check=True)
-
-            response_message = "Public key added successfully."
-            return Response(response_message)
         else:
             return Response("Public key already exists", status=200)
 
@@ -74,33 +79,30 @@ def AddUser():
     
 #Remove the Wireguard Public key API
 
-def remove_public_key(filename, public_key_to_remove):
-
-    with open(filename, 'r') as file:
-        config_text = file.read()
-
-
-    pattern = r'\[Peer\]\nPublicKey = {}\nAllowedIPs = [^\n]+\n'.format(re.escape(public_key_to_remove))
-    
- 
-    if re.search(pattern, config_text):
-        # Use re.sub to remove the matched block
-        modified_config = re.sub(pattern, '', config_text)
-
-        # Write the modified content back to the file
-        with open(filename, 'w') as file:
-            file.write(modified_config)
-            print("key add successfully")
-    else:
-        print( "Public key doesn't exist in the file.")
     
 @app.route('/api/wireguard/remove', methods=['POST'])
 def RemoveUser():
     data = request.json
-    if "key" in data:
+    if "key" in data and "ipv4" in data:
         public_key = data["key"]
+        allowed_ips = data["ipv4"]
+        
+        checks = check_string_in_file(wgconf, public_key)
+        ipcks = check_string_in_file(wgconf, allowed_ips)
+        if checks == "false" :
+            if ipcks == "false":
+                print("Taking backup of existing wg0.conf file")
+                execute_backup_script()
 
-        remove_public_key(wgconf, public_key)
+                print("Remove key and ips from wg0.conf file")
+                command = f"/usr/bin/wg set wg0 peer {public_key} remove allowed-ips {allowed_ips}"  
+                subprocess.run(command, shell=True, check=True)
+
+            else:
+                return Response("Allowed-ips not found in wg0.conf")
+        else:
+            return Response("Public not found")
+
     
     return Response("Remove user")
         
