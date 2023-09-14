@@ -89,8 +89,8 @@ def RemoveUser():
         
         checks = check_string_in_file(wgconf, public_key)
         ipcks = check_string_in_file(wgconf, allowed_ips)
-        if checks == "false" :
-            if ipcks == "false":
+        if checks == "true" :
+            if ipcks == "true":
                 print("Taking backup of existing wg0.conf file")
                 execute_backup_script()
 
@@ -106,7 +106,5 @@ def RemoveUser():
     
     return Response("Remove user")
         
-
-    return Response(response_message, status=200)
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
