@@ -33,6 +33,14 @@ def check_string_in_file(file_path, target_string):
     except Exception as e:
         return f"An error occurred: {str(e)}"
     
+def restart_wg():
+    command = "/usr/bin/systemctl restart wg-quick@wg0.service"
+    try:
+        subprocess.run(command, shell=True, check=True)
+        print("wiregurad restarted")
+    except subprocess.CalledProcessError as e:
+            print(f"Error: {e}")
+    
 # Add a wiregurad Public key API
  
 @app.route('/api/wireguard/adduser', methods=['POST'])
@@ -59,11 +67,8 @@ def AddUser():
                     print(f"Successfully added allowed IP {allowed_ips} for peer {public_key}")
                 except subprocess.CalledProcessError as e:
                     print(f"Error: {e}")
-                    
+                restart_wg()  
                 # append_key_to_file(wgconf, content)
-                command = "/usr/bin/systemctl restart wg-quick@wg0.service"
-
-                subprocess.run(command, shell=True, check=True)
 
                 response_message = "Public key added successfully."
                 return Response(response_message)
@@ -97,6 +102,8 @@ def RemoveUser():
                 print("Remove key and ips from wg0.conf file")
                 command = f"/usr/bin/wg set wg0 peer {public_key} remove allowed-ips {allowed_ips}"  
                 subprocess.run(command, shell=True, check=True)
+                restart_wg()
+                
 
             else:
                 return Response("Allowed-ips not found in wg0.conf")
@@ -104,7 +111,7 @@ def RemoveUser():
             return Response("Public not found")
 
     
-    return Response("Remove user")
+    return Response("Removed user")
         
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
