@@ -1,3 +1,4 @@
+#!/bin/bash
 # Replace '/path/to/source/file' with the actual path to your source file
 source_file="/etc/wireguard/wg0.conf"
 

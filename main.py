@@ -83,35 +83,44 @@ def AddUser():
     
     
 #Remove the Wireguard Public key API
+def remove_wireguard_peer(public_key, allowed_ips):
+    try:
+        # Assuming wgconf is the path to the wg0.conf file
+        # wgconf = "/path/to/wg0.conf"
 
-    
-@app.route('/api/wireguard/remove', methods=['POST'])
-def RemoveUser():
+        # Check if the public key exists in wg0.conf
+        if check_string_in_file(wgconf, public_key) == "true":
+            # Check if allowed-ips exists in wg0.conf
+            if check_string_in_file(wgconf, allowed_ips) == "true":
+                print("Taking backup of existing wg0.conf file")
+                execute_backup_script()
+
+                print("Removing key and ips from wg0.conf file")
+                command = f"/usr/bin/wg set wg0 peer {public_key} remove allowed-ips {allowed_ips}"  
+                subprocess.run(command, shell=True, check=True)
+                restart_wg()
+            else:
+                return Response("Allowed-ips not found in wg0.conf", status=400)
+        else:
+             return Response("Public key not found in wg0.conf", status=400)
+        
+        return Response("Peer configuration successfully removed", status=200)
+    except Exception as e:
+        return Response(str(e), status=500)
+
+@app.route('/remove_user', methods=['POST'])
+
+def remove_user():
     data = request.json
     if "key" in data and "ipv4" in data:
         public_key = data["key"]
         allowed_ips = data["ipv4"]
-        
-        checks = check_string_in_file(wgconf, public_key)
-        ipcks = check_string_in_file(wgconf, allowed_ips)
-        if checks == "true" :
-            if ipcks == "true":
-                print("Taking backup of existing wg0.conf file")
-                execute_backup_script()
+        return remove_wireguard_peer(public_key, allowed_ips)
+    else:
+        return Response("Please provide key and ipv4 value", status=400)
 
-                print("Remove key and ips from wg0.conf file")
-                command = f"/usr/bin/wg set wg0 peer {public_key} remove allowed-ips {allowed_ips}"  
-                subprocess.run(command, shell=True, check=True)
-                restart_wg()
-                
-
-            else:
-                return Response("Allowed-ips not found in wg0.conf")
-        else:
-            return Response("Public not found")
 
     
-    return Response("Removed user")
         
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
