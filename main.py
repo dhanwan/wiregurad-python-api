@@ -108,7 +108,7 @@ def remove_wireguard_peer(public_key, allowed_ips):
     except Exception as e:
         return Response(str(e), status=500)
 
-@app.route('/remove_user', methods=['POST'])
+@app.route('/api/wireguard/remove', methods=['POST'])
 
 def remove_user():
     data = request.json
