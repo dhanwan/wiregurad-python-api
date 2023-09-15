@@ -42,6 +42,13 @@ def restart_wg():
             print(f"Error: {e}")
     
 # Add a wiregurad Public key API
+
+def validate_ipv4_with_cidr(ipv4):
+    # Define a regular expression pattern for IPv4 with CIDR notation
+    ipv4_pattern = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/(32|16|24)$')
+
+    # Check if the input matches the pattern
+    return bool(ipv4_pattern.match(ipv4))
  
 @app.route('/api/wireguard/adduser', methods=['POST'])
 def AddUser():
@@ -50,6 +57,8 @@ def AddUser():
     if "key" in data and "ipv4" in data:
         public_key = data["key"]
         allowed_ips = data["ipv4"]
+        if not validate_ipv4_with_cidr(allowed_ips):
+            return Response("Invalid IPv4 format. Please provide a valid IPv4 address.", status=400)
 
         checks = check_string_in_file(wgconf, public_key)
         ipcks = check_string_in_file(wgconf, allowed_ips)
