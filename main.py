@@ -93,7 +93,7 @@ def AddUser():
                 restart_wg()  
                 # append_key_to_file(wgconf, content)
 
-                response_message = "User added successfully."
+                response_message = { "status" : 200 , "message": "User added successfully.", "success" : "true"}
                 return Response(response_message)
             else:
                 return Response("user Ip already exists Pls use different ip")
