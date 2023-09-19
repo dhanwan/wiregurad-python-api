@@ -49,6 +49,13 @@ def validate_ipv4_with_cidr(ipv4):
 
     # Check if the input matches the pattern
     return bool(ipv4_pattern.match(ipv4))
+
+def validate_wireguard_public_key(public_key):
+    # Define a regular expression pattern for a WireGuard public key
+    wireguard_key_pattern = re.compile(r'^[A-Za-z0-9+/]{43}=$')
+
+    # Check if the input matches the pattern
+    return bool(wireguard_key_pattern.match(public_key))
  
 @app.route('/api/wireguard/adduser', methods=['POST'])
 def AddUser():
@@ -57,6 +64,8 @@ def AddUser():
     if "key" in data and "ipv4" in data:
         public_key = data["key"]
         allowed_ips = data["ipv4"]
+        if not validate_wireguard_public_key(public_key):
+            return Response("Pls provide a valid publickey for users")
         if not validate_ipv4_with_cidr(allowed_ips):
             return Response("Invalid IPv4 format. Please provide a valid IPv4 address.", status=400)
 
