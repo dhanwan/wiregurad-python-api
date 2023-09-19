@@ -79,13 +79,13 @@ def AddUser():
                 restart_wg()  
                 # append_key_to_file(wgconf, content)
 
-                response_message = "Public key added successfully."
+                response_message = "User added successfully."
                 return Response(response_message)
             else:
-                return Response("Ip already exists Pls use different ip")
+                return Response("user Ip already exists Pls use different ip")
                 
         else:
-            return Response("Public key already exists", status=200)
+            return Response("Users Public key already exists", status=200)
 
     else:
         return Response("Missing 'key' or 'ipv4' fields in the JSON data.", status=400)
@@ -109,11 +109,11 @@ def remove_wireguard_peer(public_key, allowed_ips):
                 subprocess.run(command, shell=True, check=True)
                 restart_wg()
             else:
-                return Response("Allowed-ips not found in wg0.conf", status=400)
+                return Response("User Allowed-ips not found in server", status=400)
         else:
-             return Response("Public key not found in wg0.conf", status=400)
+             return Response("User Public key not found in wg0.conf", status=400)
         
-        return Response("Peer configuration successfully removed", status=200)
+        return Response("user successfully removed", status=200)
     except Exception as e:
         return Response(str(e), status=500)
 
