@@ -1,4 +1,4 @@
-from flask import Flask, request, Response
+from flask import Flask, request, Response, jsonify
 import subprocess
 import re
 app = Flask(__name__)
@@ -93,8 +93,8 @@ def AddUser():
                 restart_wg()  
                 # append_key_to_file(wgconf, content)
 
-                response_message = { "status" : 200 , "message": "User added successfully.", "success" : "true"}
-                return Response(response_message)
+                response_message = { "status" : 200 , "message": "User added successfully.", "success" : True}
+                return jsonify(response_message)
             else:
                 return Response("user Ip already exists Pls use different ip")
                 
