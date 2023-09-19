@@ -124,7 +124,10 @@ def remove_user():
     if "key" in data and "ipv4" in data:
         public_key = data["key"]
         allowed_ips = data["ipv4"]
-        return remove_wireguard_peer(public_key, allowed_ips)
+        if not validate_ipv4_with_cidr(allowed_ips):
+            return Response("Invalid IPv4 format. Please provide a valid IPv4 address.", status=400)
+        else:
+            return remove_wireguard_peer(public_key, allowed_ips)
     else:
         return Response("Please provide key and ipv4 value", status=400)
 
