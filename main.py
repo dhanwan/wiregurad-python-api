@@ -66,8 +66,8 @@ def AddUser():
     data = request.json
 
     if "key" in data and "ipv4" in data:
-        public_key = data["key"]
-        allowed_ips = data["ipv4"]
+        public_key = data["key"].strip()
+        allowed_ips = data["ipv4"].strip()
         public_key = remove_trailing_newline(public_key)
         if not validate_wireguard_public_key(public_key):
             return Response("Pls provide a valid publickey for users")
@@ -83,7 +83,7 @@ def AddUser():
                 execute_backup_script()
 
                 print("add key and ips to wg0.conf file")
-                command = f"/usr/bin/wg set wg0 peer {public_key.strip()} allowed-ips '{allowed_ips.strip()}'"
+                command = f"/usr/bin/wg set wg0 peer {public_key} allowed-ips '{allowed_ips}'"
 
                 try:
                     subprocess.run(command, shell=True, check=True)
@@ -136,13 +136,13 @@ def remove_wireguard_peer(public_key, allowed_ips):
 def remove_user():
     data = request.json
     if "key" in data and "ipv4" in data:
-        public_key = data["key"]
-        allowed_ips = data["ipv4"]
+        public_key = data["key"].strip()
+        allowed_ips = data["ipv4"].strip()
         key = remove_trailing_newline(public_key)
         if not validate_ipv4(allowed_ips):
             return Response("Invalid IPv4 format. Please provide a valid IPv4 address.", status=400)
         else:
-            return remove_wireguard_peer(key.strip(), allowed_ips.strip())
+            return remove_wireguard_peer(key, allowed_ips)
     else:
         return Response("Please provide key and ipv4 value", status=400)
 
