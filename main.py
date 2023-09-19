@@ -78,11 +78,11 @@ def AddUser():
                 execute_backup_script()
 
                 print("add key and ips to wg0.conf file")
-                command = f"/usr/bin/wg set wg0 peer {public_key} allowed-ips {allowed_ips}"
+                command = f"/usr/bin/wg set wg0 peer {public_key} allowed-ips '{allowed_ips}'"
 
                 try:
                     subprocess.run(command, shell=True, check=True)
-                    print(f"Successfully added allowed IP {allowed_ips} for peer {public_key}")
+                    print(f"Successfully added allowed IP '{allowed_ips}' for peer {public_key}")
                 except subprocess.CalledProcessError as e:
                     print(f"Error: {e}")
                 restart_wg()  
@@ -114,7 +114,7 @@ def remove_wireguard_peer(public_key, allowed_ips):
                 execute_backup_script()
 
                 print("Removing key and ips from wg0.conf file")
-                command = f"/usr/bin/wg set wg0 peer {public_key} remove allowed-ips {allowed_ips}"  
+                command = f"/usr/bin/wg set wg0 peer {public_key} remove allowed-ips '{allowed_ips}'"  
                 subprocess.run(command, shell=True, check=True)
                 restart_wg()
             else:
