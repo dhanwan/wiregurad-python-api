@@ -83,7 +83,7 @@ def AddUser():
                 execute_backup_script()
 
                 print("add key and ips to wg0.conf file")
-                command = f"/usr/bin/wg set wg0 peer {public_key} allowed-ips '{allowed_ips}'"
+                command = f"/usr/bin/wg set wg0 peer {public_key.strip()} allowed-ips '{allowed_ips.strip()}'"
 
                 try:
                     subprocess.run(command, shell=True, check=True)
@@ -142,7 +142,7 @@ def remove_user():
         if not validate_ipv4(allowed_ips):
             return Response("Invalid IPv4 format. Please provide a valid IPv4 address.", status=400)
         else:
-            return remove_wireguard_peer(key, allowed_ips)
+            return remove_wireguard_peer(key.strip(), allowed_ips.strip())
     else:
         return Response("Please provide key and ipv4 value", status=400)
 
