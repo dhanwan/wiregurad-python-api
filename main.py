@@ -70,15 +70,17 @@ def AddUser():
         allowed_ips = data["ipv4"].strip()
         public_key = remove_trailing_newline(public_key)
         if not validate_wireguard_public_key(public_key):
-            return Response("Pls provide a valid publickey for users")
+            response_message = {"status": 400, "message": "Pls provide a valid publickey for users", "success": False}
+            return jsonify(response_message)
+
         if not validate_ipv4(allowed_ips):
-            return Response("Invalid IPv4 format. Please provide a valid IPv4 address.", status=400)
+            response_message = {"status": 400, "message": "Invalid IPv4 format. Please provide a valid IPv4 address.", "success": False}
+            return jsonify(response_message)
 
         checks = check_string_in_file(wgconf, public_key)
         ipcks = check_string_in_file(wgconf, allowed_ips)
         if checks == "false" :
             if ipcks == "false":
-
                 print("Taking backup of existing wg0.conf file")
                 execute_backup_script()
 
@@ -91,19 +93,20 @@ def AddUser():
                 except subprocess.CalledProcessError as e:
                     print(f"Error: {e}")
                 restart_wg()  
-                # append_key_to_file(wgconf, content)
 
-                response_message = { "status" : 200 , "message": "User added successfully.", "success" : True}
+                response_message = {"status": 200, "message": "User added successfully.", "success": True}
                 return jsonify(response_message)
             else:
-                return Response("user Ip already exists Pls use different ip")
+                response_message = {"status": 400, "message": "user Ip already exists Pls use different ip.", "success": False}
+                return jsonify(response_message)
                 
         else:
-            return Response("Users Public key already exists", status=200)
+            response_message = {"status": 200, "message": "Users Public key already exists", "success": True}
+            return jsonify(response_message)
 
     else:
-        return Response("Missing 'key' or 'ipv4' fields in the JSON data.", status=400)
-    
+        response_message = {"status": 400, "message": "Missing 'key' or 'ipv4' fields in the JSON data.", "success": False}
+        return jsonify(response_message)
     
 #Remove the Wireguard Public key API
 def remove_wireguard_peer(public_key, allowed_ips):
@@ -122,14 +125,18 @@ def remove_wireguard_peer(public_key, allowed_ips):
                 command = f"/usr/bin/wg set wg0 peer {public_key} remove allowed-ips '{allowed_ips}/32'"  
                 subprocess.run(command, shell=True, check=True)
                 restart_wg()
+                response_message = {"status": 200, "message": "User successfully removed.", "success": True}
+                return jsonify(response_message)
             else:
-                return Response("User Allowed-ips not found in server", status=400)
+                response_message = {"status": 400, "message": "User Allowed-ips not found in server.", "success": False}
+                return jsonify(response_message)
         else:
-             return Response("User Public key not found in wg0.conf", status=400)
+             response_message = {"status": 400, "message": "User Public key not found in wg0.conf.", "success": False}
+             return jsonify(response_message)
         
-        return Response("user successfully removed", status=200)
     except Exception as e:
-        return Response(str(e), status=500)
+        response_message = {"status": 500, "message": str(e), "success": False}
+        return jsonify(response_message)
 
 @app.route('/api/wireguard/remove', methods=['POST'])
 
@@ -140,11 +147,13 @@ def remove_user():
         allowed_ips = data["ipv4"].strip()
         key = remove_trailing_newline(public_key)
         if not validate_ipv4(allowed_ips):
-            return Response("Invalid IPv4 format. Please provide a valid IPv4 address.", status=400)
+            response_message = {"status": 400, "message": "Invalid IPv4 format. Please provide a valid IPv4 address.", "success": False}
+            return jsonify(response_message)
         else:
             return remove_wireguard_peer(key, allowed_ips)
     else:
-        return Response("Please provide key and ipv4 value", status=400)
+        response_message = {"status": 400, "message": "Please provide key and ipv4 value", "success": False}
+        return jsonify(response_message)
 
 
     
