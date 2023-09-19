@@ -43,9 +43,9 @@ def restart_wg():
     
 # Add a wiregurad Public key API
 
-def validate_ipv4_with_cidr(ipv4):
-    # Define a regular expression pattern for IPv4 with CIDR notation
-    ipv4_pattern = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/(32|16|24)$')
+def validate_ipv4(ipv4):
+    # Define a regular expression pattern for IPv4 addresses
+    ipv4_pattern = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
 
     # Check if the input matches the pattern
     return bool(ipv4_pattern.match(ipv4))
@@ -56,6 +56,10 @@ def validate_wireguard_public_key(public_key):
 
     # Check if the input matches the pattern
     return bool(wireguard_key_pattern.match(public_key))
+
+def remove_trailing_newline(publickey):
+    # Use rstrip to remove trailing newline characters
+    return publickey.rstrip('\n')
  
 @app.route('/api/wireguard/adduser', methods=['POST'])
 def AddUser():
@@ -64,9 +68,10 @@ def AddUser():
     if "key" in data and "ipv4" in data:
         public_key = data["key"]
         allowed_ips = data["ipv4"]
+        public_key = remove_trailing_newline(public_key)
         if not validate_wireguard_public_key(public_key):
             return Response("Pls provide a valid publickey for users")
-        if not validate_ipv4_with_cidr(allowed_ips):
+        if not validate_ipv4(allowed_ips):
             return Response("Invalid IPv4 format. Please provide a valid IPv4 address.", status=400)
 
         checks = check_string_in_file(wgconf, public_key)
@@ -82,7 +87,7 @@ def AddUser():
 
                 try:
                     subprocess.run(command, shell=True, check=True)
-                    print(f"Successfully added allowed IP '{allowed_ips}' for peer {public_key}")
+                    print(f"Successfully added allowed IP '{allowed_ips}' for peer {public_key}/32")
                 except subprocess.CalledProcessError as e:
                     print(f"Error: {e}")
                 restart_wg()  
@@ -114,7 +119,7 @@ def remove_wireguard_peer(public_key, allowed_ips):
                 execute_backup_script()
 
                 print("Removing key and ips from wg0.conf file")
-                command = f"/usr/bin/wg set wg0 peer {public_key} remove allowed-ips '{allowed_ips}'"  
+                command = f"/usr/bin/wg set wg0 peer {public_key} remove allowed-ips '{allowed_ips}/32'"  
                 subprocess.run(command, shell=True, check=True)
                 restart_wg()
             else:
@@ -133,7 +138,8 @@ def remove_user():
     if "key" in data and "ipv4" in data:
         public_key = data["key"]
         allowed_ips = data["ipv4"]
-        if not validate_ipv4_with_cidr(allowed_ips):
+        public_key = remove_trailing_newline(public_key)
+        if not validate_ipv4(allowed_ips):
             return Response("Invalid IPv4 format. Please provide a valid IPv4 address.", status=400)
         else:
             return remove_wireguard_peer(public_key, allowed_ips)
