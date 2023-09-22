@@ -97,10 +97,9 @@ def remove_user():
                 response_message = {"status": 400, "message": "Invalid IPv4 format. Please provide a valid IPv4 address.", "success": False}
                 return jsonify(response_message)
         # Check SSH connections
-            ssh_successful = wgremotecmd.check_ssh_connections(hosts, username, private_key_path)
         
 
-            command = f"/mnt/wg_python/main.py -key {public_key} -ip {allowed_ips} -A remove"
+            command = f"/mnt/wg_python/wiregurad.py -key {public_key} -ip {allowed_ips} -A remove"
             responses = execute_ssh_command_multiprocess(hosts, username, private_key_path, command)
                 # json_reponse = beautify_json(responses)
             return jsonify(responses)
