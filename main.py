@@ -5,8 +5,8 @@ app = Flask(__name__)
 
 # Taking backup of existing file
 username = 'root'
-private_key_path = '/Users/ntf-m3/.ssh/id_rsa'
-hosts = ['ca1.limevpn.com','ny01.limevpn.com']
+private_key_path = 'ssh_key/wg'
+hosts = ['ca1.limevpn.com','ny01.ligfmevpn.com']
 
 def beautify_json(json_string):
     try:
@@ -69,17 +69,13 @@ def AddUser():
             response_message = {"status": 400, "message": "Invalid IPv4 format. Please provide a valid IPv4 address.", "success": False}
             return jsonify(response_message)
     # Check SSH connections
-        ssh_successful = wgremotecmd.check_ssh_connections(hosts, username, private_key_path)
+        # ssh_successful = wgremotecmd.check_ssh_connections(hosts, username, private_key_path)
       
-        if ssh_successful:
-            command = f"/mnt/wg_python/wiregurad.py -key {public_key} -ip {allowed_ips} -A add"
-            responses = execute_ssh_command_multiprocess(hosts, username, private_key_path, command)
+        # if ssh_successful:
+        command = f"/mnt/wg_python/wiregurad.py -key {public_key} -ip {allowed_ips} -A add"
+        responses = execute_ssh_command_multiprocess(hosts, username, private_key_path, command)
             # json_reponse = beautify_json(responses)
-            return jsonify(responses)
-
-        else:
-            response_message = {"status": 200, "message": "Remote command execuation failed to vpn server pls check the server", "success": True}
-            return jsonify(response_message)
+        return jsonify(responses)
 
     
 
@@ -103,15 +99,12 @@ def remove_user():
         # Check SSH connections
             ssh_successful = wgremotecmd.check_ssh_connections(hosts, username, private_key_path)
         
-            if ssh_successful:
-                command = f"/mnt/wg_python/main.py -key {public_key} -ip {allowed_ips} -A remove"
-                responses = execute_ssh_command_multiprocess(hosts, username, private_key_path, command)
-                # json_reponse = beautify_json(responses)
-                return jsonify(responses)
 
-            else:
-                response_message = {"status": 200, "message": "Remote command execuation failed to vpn server pls check the server", "success": True}
-                return jsonify(response_message)
+            command = f"/mnt/wg_python/main.py -key {public_key} -ip {allowed_ips} -A remove"
+            responses = execute_ssh_command_multiprocess(hosts, username, private_key_path, command)
+                # json_reponse = beautify_json(responses)
+            return jsonify(responses)
+
 
 
     
