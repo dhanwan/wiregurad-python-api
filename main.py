@@ -6,7 +6,7 @@ app = Flask(__name__)
 # Taking backup of existing file
 username = 'root'
 private_key_path = 'ssh_key/wg'
-hosts = ['ca1.limevpn.com','ny01.ligfmevpn.com']
+hosts = ['ca1.limevpn.com','ny01.limevpn.com']
 
 def beautify_json(json_string):
     try:
