@@ -1,24 +1,53 @@
 
-import paramiko
+import paramiko, multiprocessing
 
 import json
 
-def check_ssh_connections(hosts, username, private_key_path):
-    try:
+def ssh_connecation(host, username, private_key_path):
+   
         # Initialize an SSH client
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-        for host in hosts:
-            try:
+        try:
                 ssh.connect(host, username=username, key_filename=private_key_path)
                 ssh.close()
-            except Exception as e:
+                return True 
+        except Exception as e:
                 return False  # SSH connection failed for at least one host
 
-        return True  # All SSH connections were successful
+ # All SSH connections were successful
+
+def check_ssh_connections(hosts, username, private_key_path):
+    results = []
+    processes = []
+
+    # Create a multiprocessing Pool
+    pool = multiprocessing.Pool(processes=len(hosts))
+
+    try:
+        # Map the execute_ssh_command function to each host with common arguments
+        for host in hosts:
+            process = pool.apply_async(ssh_connecation, (host, username, private_key_path))
+            processes.append(process)
+
+        # Wait for all processes to complete and retrieve their results
+        pool.close()
+        pool.join()
+
+        # Retrieve results from the completed processes
+        for process in processes:
+            result = process.get()
+            results.append(result)
+        if all(results):
+            return True
+        else:
+            return False
+
     except Exception as e:
-        return False  # Exception occurred
+        results.append({"error": str(e)})
+
+      
 
 
 

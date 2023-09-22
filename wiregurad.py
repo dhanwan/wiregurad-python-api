@@ -1,6 +1,8 @@
+#! /usr/bin/python3
 import wgvalidation
 import subprocess
 import argparse
+from platform import node
 
 # Define command-line arguments
 parser = argparse.ArgumentParser(description="Add a user to a WireGuard configuration.")
@@ -16,6 +18,8 @@ wgconf = "/etc/wireguard/wg0.conf"
 # Extract the values from command-line arguments
 public_key = args.public_key
 allowed_ips = args.allowed_ips
+
+hostname = node()
 
 def addUser(public_key, allowed_ips):
         result = {}
@@ -34,15 +38,15 @@ def addUser(public_key, allowed_ips):
                         wgvalidation.restart_wg()  
                         # append_key_to_file(wgconf, content)
 
-                        output = {"message":"User creation is successfull","public_key":public_key,"IP address":allowed_ips,"success": True}
+                        output = {"Host": hostname ,"message":"User creation is successfull","public_key":public_key,"IP address":allowed_ips,"success": True}
                         result = output
                         return result
                 else:
-                        output = {"message":"User IP Address alredy exists, Use different one","success": False}
+                        output = {"Host": hostname,"message":"User IP Address alredy exists, Use different one","success": False}
                         result = output
                         return result
         else:
-                output = {"message":"user public key already exists.","success": False}
+                output = {"Host": hostname,"message":"user public key already exists.","success": False}
                 result = output
                 return result              
 
@@ -57,16 +61,16 @@ def removeuser(public_key, allowed_ips):
                         command = f"/usr/bin/wg set wg0 peer {public_key} remove allowed-ips '{allowed_ips}/32'"  
                         subprocess.run(command, shell=True, check=True)
                         wgvalidation.restart_wg()
-                        output = {"message":"User Removed SuccessFully","public_key":public_key,"IP address":allowed_ips,"success": True}
+                        output = {"Host": hostname,"message":"User Removed SuccessFully","public_key":public_key,"IP address":allowed_ips,"success": True}
                         result = output
                         return result
 
                else:
-                      output = {"message":"User IP address doesn't exists..","success": False}
+                      output = {"Host": hostname,"message":"User IP address doesn't exists..","success": False}
                       result = output
                       return result
         else:
-                output = {"message":"User Public Key doesn't exists..","success": False}
+                output = {"Host": hostname,"message":"User Public Key doesn't exists..","success": False}
                 result = output
                 return result
 

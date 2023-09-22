@@ -72,7 +72,7 @@ def AddUser():
         ssh_successful = wgremotecmd.check_ssh_connections(hosts, username, private_key_path)
       
         if ssh_successful:
-            command = f"/mnt/wg_python/main.py -key {public_key} -ip {allowed_ips} -A add"
+            command = f"/mnt/wg_python/wiregurad.py -key {public_key} -ip {allowed_ips} -A add"
             responses = execute_ssh_command_multiprocess(hosts, username, private_key_path, command)
             # json_reponse = beautify_json(responses)
             return jsonify(responses)
