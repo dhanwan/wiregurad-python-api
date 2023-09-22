@@ -1,11 +1,12 @@
 from flask import Flask, request, Response, jsonify
 import wgvalidation, wgremotecmd, json 
+import multiprocessing
 app = Flask(__name__)
 
 # Taking backup of existing file
 username = 'root'
 private_key_path = '/Users/ntf-m3/.ssh/id_rsa'
-hosts = ['ca1.limevpn.com']
+hosts = ['ca1.limevpn.com','ny01.limevpn.com']
 
 def beautify_json(json_string):
     try:
@@ -19,6 +20,36 @@ def beautify_json(json_string):
         return beautified_json
     except json.JSONDecodeError as e:
         return f"Error: Failed to beautify JSON - {str(e)}"
+    
+def execute_ssh_command_multiprocess(hosts, username, private_key_path, command):
+    results = []
+    processes = []
+
+    # Create a multiprocessing Pool
+    pool = multiprocessing.Pool(processes=len(hosts))
+
+    try:
+        # Map the execute_ssh_command function to each host with common arguments
+        for host in hosts:
+            process = pool.apply_async(wgremotecmd.execute_ssh_command, (host, username, private_key_path, command))
+            processes.append(process)
+
+        # Wait for all processes to complete and retrieve their results
+        pool.close()
+        pool.join()
+
+        # Retrieve results from the completed processes
+        for process in processes:
+            result = process.get()
+            results.append(result)
+
+    except Exception as e:
+        results.append({"error": str(e)})
+
+    return results
+
+     
+     
 
 
 @app.route('/api/wireguard/adduser', methods=['POST'])
@@ -42,22 +73,14 @@ def AddUser():
       
         if ssh_successful:
             command = f"/mnt/wg_python/main.py -key {public_key} -ip {allowed_ips} -A add"
-            responses = wgremotecmd.execute_ssh_command(hosts, username, private_key_path, command)
-            json_reponse = beautify_json(responses)
-            return jsonify(json_reponse)
+            responses = execute_ssh_command_multiprocess(hosts, username, private_key_path, command)
+            # json_reponse = beautify_json(responses)
+            return jsonify(responses)
 
         else:
             response_message = {"status": 200, "message": "Remote command execuation failed to vpn server pls check the server", "success": True}
             return jsonify(response_message)
 
-  
-
-
-
-
-
-
-            
     
 
 @app.route('/api/wireguard/remove', methods=['POST'])
@@ -82,10 +105,9 @@ def remove_user():
         
             if ssh_successful:
                 command = f"/mnt/wg_python/main.py -key {public_key} -ip {allowed_ips} -A remove"
-                responses = wgremotecmd.execute_ssh_command(hosts, username, private_key_path, command)
-                responses = wgremotecmd.execute_ssh_command(hosts, username, private_key_path, command)
-                json_reponse = beautify_json(responses)
-                return jsonify(json_reponse)
+                responses = execute_ssh_command_multiprocess(hosts, username, private_key_path, command)
+                # json_reponse = beautify_json(responses)
+                return jsonify(responses)
 
             else:
                 response_message = {"status": 200, "message": "Remote command execuation failed to vpn server pls check the server", "success": True}

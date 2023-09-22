@@ -22,10 +22,8 @@ def check_ssh_connections(hosts, username, private_key_path):
 
 
 
-def execute_ssh_command(hosts, username, private_key_path, command):
-    results = []  # Create a list to store the results for each host
-
-    for host in hosts:
+def execute_ssh_command(host, username, private_key_path, command):
+        results = []  # Create a list to store the results for each host
         try:
             # Initialize an SSH client
             ssh = paramiko.SSHClient()
@@ -52,5 +50,5 @@ def execute_ssh_command(hosts, username, private_key_path, command):
         except Exception as e:
             results.append({"error": str(e)})
 
-    return results
+        return results
 
