@@ -6,7 +6,8 @@ app = Flask(__name__)
 # Taking backup of existing file
 username = 'root'
 private_key_path = 'ssh_key/wg'
-hosts = ['ca1.limevpn.com','ny01.limevpn.com']
+hosts = ['ca1.limevpn.com',
+         'ny01.limevpn.com']
 
 def beautify_json(json_string):
     try:
@@ -72,7 +73,7 @@ def AddUser():
         # ssh_successful = wgremotecmd.check_ssh_connections(hosts, username, private_key_path)
       
         # if ssh_successful:
-        command = f"/mnt/wg_python/wiregurad.py -key {public_key} -ip {allowed_ips} -A add"
+        command = f"/opt/wiregurad-python-api/wiregurad.py -key {public_key} -ip {allowed_ips} -A add"
         responses = execute_ssh_command_multiprocess(hosts, username, private_key_path, command)
             # json_reponse = beautify_json(responses)
         return jsonify(responses)
@@ -99,7 +100,7 @@ def remove_user():
         # Check SSH connections
         
 
-            command = f"/mnt/wg_python/wiregurad.py -key {public_key} -ip {allowed_ips} -A remove"
+            command = f"/opt/wiregurad-python-api/wiregurad.py -key {public_key} -ip {allowed_ips} -A remove"
             responses = execute_ssh_command_multiprocess(hosts, username, private_key_path, command)
                 # json_reponse = beautify_json(responses)
             return jsonify(responses)
